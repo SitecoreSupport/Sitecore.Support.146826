@@ -10,9 +10,7 @@
         { "class", @Model.CssClass },
         { "id", Model.ClientId },
         { "role", "form" },
-        { Constants.Wffm, Model.Item.ID },
-        // Sitecore.Support.146826
-        { "action", Sitecore.Links.LinkManager.GetItemUrl(Sitecore.Context.Item) }
+        { Constants.Wffm, Model.Item.ID }
     };
 
     var queryString = new RouteValueDictionary(Request.QueryString.AllKeys.ToDictionary(key => key, key => (object)Request.QueryString[key]));
@@ -33,6 +31,8 @@
     }
     else
     {
+        // Sitecore.Support.146826
+        attributes.Add("action", Sitecore.Links.LinkManager.GetItemUrl(Sitecore.Context.Item));
         routeName = Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName;
     }
 
