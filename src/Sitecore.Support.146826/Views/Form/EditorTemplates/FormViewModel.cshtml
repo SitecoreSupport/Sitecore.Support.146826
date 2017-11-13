@@ -1,0 +1,71 @@
+﻿@using Sitecore.Forms.Mvc
+@using Sitecore.Forms.Mvc.Html
+@using Sitecore.Globalization
+@model Sitecore.Forms.Mvc.ViewModels.FormViewModel
+
+@{
+    var attributes = new RouteValueDictionary()
+    {
+        { "enctype", "multipart/form-data" },
+        { "class", @Model.CssClass },
+        { "id", Model.ClientId },
+        { "role", "form" },
+        { Constants.Wffm, Model.Item.ID }
+    };
+
+    var queryString = new RouteValueDictionary(Request.QueryString.AllKeys.ToDictionary(key => key, key => (object)Request.QueryString[key]));
+
+    if (Model.IsAjaxForm)
+    {
+        attributes.Add("data-wffm-ajax", true);
+        if (!string.IsNullOrEmpty(Model.RedirectUrl))
+        {
+            attributes.Add("data-wffm-redirect", UrlHelper.GenerateContentUrl(Model.RedirectUrl, Context));
+        }
+    }
+}
+
+@using (Html.BeginRouteForm(Sitecore.Mvc.Configuration.MvcSettings.SitecoreRouteName, queryString, FormMethod.Post, attributes))
+{
+    var uniqueId = Model.UniqueId.ToString();
+    Html.EnableClientValidation(true);
+    Html.EnableUnobtrusiveJavaScript(true);
+    @Html.AntiForgeryToken()
+    @Html.Hidden(Constants.Id, uniqueId)
+    @Html.Hidden(Constants.FormItemId, Model.Item.ID)
+
+    if (Model.ShowTitle)
+    {
+        var headerText = Html.BootstrapText("Title");
+        @Html.BootstrapHeader(headerText.ToString())
+    }
+
+    if (Model.SuccessSubmit)
+    {
+        @Html.Encode(!string.IsNullOrEmpty(Model.SuccessMessage) ? Model.SuccessMessage : Translate.Text("Default success message."))
+        return;
+    }
+
+    if (Model.Errors.Any())
+    {
+        @Html.BootstrapWarningsList(Model.Errors)
+    }
+
+    if (Model.ShowInformation)
+    {
+        @Html.BootstrapText("Information")
+    }
+
+    <div class="has-error has-feedback">
+        @Html.BootstrapValidationSammary(false)
+    </div>
+
+    @Html.EditorFor(x => Model.Sections)
+
+    if (Model.ShowFooter)
+    {
+        @Html.BootstrapText("Footer")
+    }
+
+    @Html.BootstrapSubmit()
+}
